@@ -1,7 +1,6 @@
 # encoding:utf-8
 from Scripts.sql_server.SQLS import sqlserver
 from pymavlink import mavutil
-import pygsheets
 import os
 import time
 from dronekit import connect, VehicleMode, LocationGlobalRelative
@@ -16,6 +15,7 @@ vehicle = connect(connection_srt, wait_ready=True)  # 無人機與電腦連線
 print('無人機與電腦連接成功')
 
 # 從下複製貼上
+
 
 head = ''
 gpsnow = ''
@@ -189,6 +189,7 @@ def status():
     server.sql_update(1, 'GPSInfo', str(gps0))
     gps = str(vehicle.location.global_relative_frame.lat) + \
         ',' + str(vehicle.location.global_relative_frame.lon)
+    print(gps)
     server.sql_update(1, 'lat_lon', gps)
     if float(vehicle.battery.voltage) < 21.3 and row[5] == 1:
         print('低電壓')
@@ -277,17 +278,27 @@ def allmove(ms1, ma2, ma3):
 
 # ---------建立連線---------
 server = sqlserver("test", '00000000')
-row = server.sql_listen(1)
 
 a = 0
+server_connect_num = 0
+
 while True:
     try:
         row = server.sql_listen(ID)
         print(row)
+        server.sql_update(ID, 'connect_status', 'true')
+        server_connect_num = 0
+    except:
+        server_connect_num += 1
+
+    try:
+        if server_connect_num == 2:
+            if vehicle.mode.name == 'GUIDED':
+                land(head)
+                break
         status()
         if not vehicle.armed:
             server.sql_update(ID, 'dronemode', 2)
-
         if row[1] != None:
             server.sql_update(ID, 'dronemode', 3)
             head, gpsnow = takeoff(row[1])

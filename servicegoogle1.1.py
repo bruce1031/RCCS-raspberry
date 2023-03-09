@@ -1,6 +1,5 @@
 # encoding:utf-8
 from pymavlink import mavutil
-import pygsheets
 import os
 import time
 from dronekit import connect, VehicleMode, LocationGlobalRelative
@@ -287,13 +286,24 @@ def allmove(ms1, ma2, ma3):
 
 # ---------建立連線---------
 server = sqlserver("test", '00000000')
-row = server.sql_listen(1)
 
 a = 0
+server_connect_num = 0
+
 while True:
     try:
-        row = server.sql_listen(ID) 
+        row = server.sql_listen(ID)
         print(row)
+        server.sql_update(ID, 'connect_status', 'true')
+        server_connect_num = 0
+    except:
+        server_connect_num += 1
+
+    try:
+        if server_connect_num == 2:
+            if vehicle.mode.name == 'GUIDED':
+                land(head)
+                break
         status()
         if not vehicle.armed:
             server.sql_update(ID, 'dronemode', 2)
