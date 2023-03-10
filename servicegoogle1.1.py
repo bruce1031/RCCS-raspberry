@@ -26,8 +26,6 @@ EH10.set_return_head_cmd()
 # 從下複製貼上
 
 head = ''
-gpsnow = ''
-
 pitch = 0
 yaw = 0
 
@@ -38,8 +36,6 @@ def takeoff(height):
     while True:
         head = vehicle.heading
         print(height)
-        gpsnow = str(vehicle.location.global_relative_frame.lat) + \
-            ',' + str(vehicle.location.global_relative_frame.lon)
         # 有無gps fix 濾波器
         # 無gps無法啟動
         server.sql_update(ID, 'takeoff', '')
@@ -76,40 +72,29 @@ def takeoff(height):
         while True:
             time.sleep(1)
             print("目前高度：", vehicle.location.global_relative_frame.alt)
-            status()
+            status(False)
+            server.sql_update(ID, 'connect_status', 'true')
             if float(vehicle.location.global_relative_frame.alt) >= float(height)*0.95:
                 break
         server.sql_update(ID, 'dronemode', '1')
         send('完成')
         break
-    return head, gpsnow
-
-
-def close(height):
-    while True:
-        time.sleep(1)
-        print("目前高度：", vehicle.location.global_relative_frame.alt)
-        if float(vehicle.location.global_relative_frame.alt) >= float(height)*0.95:
-            time.sleep(1)
-            break
-    server.sql_update(ID, 'dronemode', '1')
-    send('完成')
+    return head
 
 
 def updown(ud):
     server.sql_update(ID, 'up_down', '')
-    time.sleep(1)
     alt = int(vehicle.location.global_relative_frame.alt)
     if not alt+2 > int(ud) > alt-2:
         server.sql_update(ID, 'dronemode', '3')
-        time.sleep(1)
         lat = vehicle.location.global_relative_frame.lat
         lon = vehicle.location.global_relative_frame.lon
         vehicle.simple_goto(LocationGlobalRelative(lat, lon, int(ud)))
         while True:
             time.sleep(1)
             print("目前高度：", vehicle.location.global_relative_frame.alt)
-            status()
+            status(False)
+            server.sql_update(ID, 'connect_status', 'true')
             if float(ud)*1.02 >= float(vehicle.location.global_relative_frame.alt) >= float(ud)*0.98:
                 break
         server.sql_update(ID, 'dronemode', '1')
@@ -119,40 +104,47 @@ def updown(ud):
 
 
 def land(head):
-    print("返回中")
-    send('返回中')
-    condition_yaw(head, False)
-    while vehicle.heading != head:
-        if head-5 <= vehicle.heading <= head+5:
-            break
-        else:
-            time.sleep(1)
-            print('延遲中')
-    vehicle.mode = VehicleMode("LAND")
+    print("即將降落")
+    send('即將降落，請注意無人機落位置是否安全')
+    try:
+        condition_yaw(head, False)
+        while vehicle.heading != head:
+            if head-5 <= vehicle.heading <= head+5:
+                break
+            else:
+                time.sleep(1)
+                print('延遲中')
+    except:
+        pass
+    vehicle.parameters['RTL_ALT'] = 0
+    vehicle.mode = VehicleMode("RTL")
     while vehicle.armed:
         gps0 = "%s" % vehicle.gps_0
-        print(gps0)
-        server.sql_update(
-            1, 'status', vehicle.location.global_relative_frame.alt)
-        server.sql_update(1, 'dronebatt', vehicle.battery.voltage)
-        server.sql_update(1, 'GPSInfo', str(gps0))
-        gps = str(vehicle.location.global_relative_frame.lat) + \
-            ',' + str(vehicle.location.global_relative_frame.lon)
-        server.sql_update(1, 'lat_lon', gps)
+        try:
+            status(False)
+        except:
+            pass
         print('返回中')
         time.sleep(1)
 
-    server.sql_update(ID, 'dronemode', '2')
-    server.sql_update(ID, 'land', '')
+    try:
+        server.sql_update(ID, 'dronemode', '2')
+        server.sql_update(ID, 'land', '')
+    except:
+        pass
     send('完成')
     vehicle.mode = VehicleMode("GUIDED")
 
 
 def send(txt):
-    server.sql_update(ID, 'massage', txt)
+    try:
+        server.sql_update(ID, 'massage', txt)
+    except:
+        pass
 
 
 def condition_yaw(heading, relative):
+    heading = int(heading)
     if relative:
         isRelative = 1
         if heading < 0:
@@ -188,21 +180,29 @@ def condition_yaw(heading, relative):
     time.sleep(1)
 
 
-def status():
-    # 狀態輸出     高度 電量 gps
+def status(info):
+    '''輸輸入:true or flase(是否要進行低電壓檢測)
+    return 高度，電壓，經緯度
+    作用:監測低電壓，高度 電量 gps上傳到sql'''
+    if info == True:
+        if float(vehicle.battery.voltage) < 21.3 and row[5] == 1:
+            print('低電壓')
+            try:
+                send("低電壓、將強制降落")
+            except:
+                pass
+            land(head)
+
+    server.sql_update(ID, 'alt', vehicle.location.global_relative_frame.alt)
+    server.sql_update(ID, 'dronebatt', vehicle.battery.voltage)
     gps0 = "%s" % vehicle.gps_0
-    print(gps0)
-    server.sql_update(1, 'status', vehicle.location.global_relative_frame.alt)
-    server.sql_update(1, 'dronebatt', vehicle.battery.voltage)
-    server.sql_update(1, 'GPSInfo', str(gps0))
+    server.sql_update(ID, 'GPSInfo', str(gps0))
     gps = str(vehicle.location.global_relative_frame.lat) + \
         ',' + str(vehicle.location.global_relative_frame.lon)
-    print(gps)
-    server.sql_update(1, 'lat_lon', gps)
-    if float(vehicle.battery.voltage) < 21.3 and row[5] == 1:
-        print('低電壓')
-        send("低電壓、將強制降落")
-        land(head)
+    server.sql_update(ID, 'lat_lon', gps)
+    server.sql_update(ID, 'connect_status', 'true')
+
+    return vehicle.location.global_relative_frame.alt, vehicle.battery.voltage, gps
 
 
 def send_body_ned_velocity(velocity_x, velocity_y, velocity_z, duration):
@@ -226,12 +226,12 @@ def send_body_ned_velocity(velocity_x, velocity_y, velocity_z, duration):
         time.sleep(0.3)
 
     server.sql_update(ID, 'forward_back', '')
-    time.sleep(0.5)
     print('完成')
     send('完成')
 
 
-def cam_control(cam):  # 置中'0'向右'1'向左'2'向上'3'向下'4'
+def cam_control(cam):
+    '''置中'0'向右'1'向左'2'向上'3'向下"4"'''
     # control Mode:MODE_ANGLE_REF_FRAME
     # pitch angle: 正值向下，負值向上
     # yaw angle:   正值向右，負值向左
@@ -292,24 +292,15 @@ server_connect_num = 0
 
 while True:
     try:
+        alt, bat, gps = status(True)
         row = server.sql_listen(ID)
         print(row)
         server.sql_update(ID, 'connect_status', 'true')
-        server_connect_num = 0
-    except:
-        server_connect_num += 1
-
-    try:
-        if server_connect_num == 2:
-            if vehicle.mode.name == 'GUIDED':
-                land(head)
-                break
-        status()
         if not vehicle.armed:
             server.sql_update(ID, 'dronemode', 2)
         if row[1] != None:
             server.sql_update(ID, 'dronemode', 3)
-            head, gpsnow = takeoff(row[1])
+            head = takeoff(row[1])
         if row[2] != None:
             server.sql_update(ID, 'dronemode', 3)
             land(head)
