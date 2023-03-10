@@ -4,8 +4,8 @@ import time
 
 class sqlserver:
     def __init__(self, user, password):
-        "self.host = '172.23.70.50'"
-        self.host = '192.168.0.69'  # 網内使用
+        self.host = '172.23.70.50'
+        "self.host = '192.168.0.69'"  # 網内使用
         self.server = 'georobot\GEOSAT'
         self.port = '49172'
         self.user = user
@@ -100,7 +100,7 @@ class sqlserver:
 if __name__ == '__main__':
     d = 0
     D = 0
-    col_Table = ['id', 'takeoff', 'land', 'massage', 'status', 'dronemode', 'up_down', 'lat_lon', 'droneturn',
+    col_Table = ['id', 'takeoff', 'land', 'massage', 'alt', 'dronemode', 'up_down', 'lat_lon', 'droneturn',
                  'forward_back', 'allmove', 'cam', 'dronebatt', 'GPSInfo', 'allmove_FW', 'allmove_LR', 'allmove_yaw', 'connect_status']
     #sql_data = sqlserver("test", '00000000')
     #print(sql_data.sql_select(1, 'takeoff'))
@@ -109,7 +109,7 @@ if __name__ == '__main__':
         event = str(input('updata(ud)/read(r)'))
 
         if event == 'ud':
-            print('欄位名稱: 1-id , 2-takeoff , 3-land , 4-massage , 5-status , 6-dronemode , 7-up_down , 8-lat_lon , 9-droneturn , 10-forward_back , 11-allmove , 12-cam , 13-dronebatt , 14-GPSInfo',
+            print('欄位名稱: 1-id , 2-takeoff , 3-land , 4-massage , 5-alt , 6-dronemode , 7-up_down , 8-lat_lon , 9-droneturn , 10-forward_back , 11-allmove , 12-cam , 13-dronebatt , 14-GPSInfo',
                   '15-allmove_FW', '16-allmove_LR', '17-allmove_yaw', '18-connect_status')
             a = input('輸入欄位名稱or編號:')
             try:
