@@ -235,25 +235,62 @@ class Gimbal:
         self.send_cmd(CAMERA_CMD_CONTROL)
         return CAMERA_CMD_CONTROL
 
+    
 
 if __name__ == '__main__':
-    EH10 = Gimbal("/dev/ttyACM0", 115200)
+    EH10 = Gimbal("/dev/ttyUSB0", 115200)
     ## example1: ROLL no control, PITCH speed mode 1.22degree/sec, YAW speed mode 1.22degree/sec.
-    CMD_CONTROL_FRAME = EH10.set_movement_cmd(0, 1, 1, 0, 0, 1.22, 0, 1.22, 0)
+    pitch = 0
+    yaw = 0
 
-    ## Example2: ROLL no control, PITCH angle mode to 40 degree down REF home position,
-    ## YAW angle mode 40 degree left REF home position.
-    #CMD_CONTROL_FRAME = EH10.set_movement_cmd(0, 5, 5, 0, 0, 0, 40, 0, -40)
+    while True:
+        cam = str(input('number:'))
+        print(cam)
 
-    ## Example3: RC control pitch down( PWM = 1920, PA value = 1920-1500 = 420),
-    ## RC control Yaw left (PWM = 1050, YA value = 1050-1500 = -450)
-    #CMD_CONTROL_FRAME = EH10.set_movement_cmd(0, 4, 4, 0, 0, 0, 1920, 0, 1050)
+        if cam == '0':
+            EH10.set_return_head_cmd()
+            EH10.set_camera_zoomOut_cmd()     # camera zoom in
+            pitch = 0
+            yaw = 0
+            time.sleep(5)
+            EH10.set_camera_stop_zoom_cmd()
+        if cam == '1':
+            yaw = yaw+10
+        if cam == '2':
+            yaw = yaw-10
+        if cam == '3':
+            pitch = pitch-5
+        if cam == '4':
+            pitch = pitch+5
+        if cam == '5':
+            EH10.set_camera_zoomIn_cmd()     # camera zoom in
+            time.sleep(0.66)
+            EH10.set_camera_stop_zoom_cmd()  # camera stop zoom
+        if cam == '6':
+            EH10.set_camera_zoomOut_cmd()     # camera zoom in
+            time.sleep(0.66)
+            EH10.set_camera_stop_zoom_cmd()  # camera stop zoom
+        EH10.set_movement_cmd(0, 5, 5, 0, 0, 50, pitch, 50, yaw)
 
-    ## Open gimbal's attitude continuous feedback
-    #CMD_CONTROL_FRAME = EH10.set_open_auto_feedback_cmd()
+        print(f'pitch:{pitch} , yaw:{yaw}' )
 
-    ## set auto feedback interval time: unit:ms
-    #CMD_CONTROL_FRAME = EH10.set_auto_feedback_interval_time_cmd(1000)
 
-    print(" ".join(format(x, '02x') for x in CMD_CONTROL_FRAME))
-    #rpi_ser.write(serial.to_bytes(CMD_CONTROL_FRAME))  # serial transmit data to EH10(control command)
+
+        ###CMD_CONTROL_FRAME = EH10.set_movement_cmd(0, 1, 1, 0, 0, 1.22, 0, 1.22, 0)
+
+        ## Example2: ROLL no control, PITCH angle mode to 40 degree down REF home position,
+        ## YAW angle mode 40 degree left REF home position.
+        #CMD_CONTROL_FRAME = EH10.set_movement_cmd(0, 5, 5, 0, 0, 0, 40, 0, -40)
+
+        ## Example3: RC control pitch down( PWM = 1920, PA value = 1920-1500 = 420),
+        ## RC control Yaw left (PWM = 1050, YA value = 1050-1500 = -450)
+        #CMD_CONTROL_FRAME = EH10.set_movement_cmd(0, 4, 4, 0, 0, 0, 1920, 0, 1050)
+
+        ## Open gimbal's attitude continuous feedback
+        #CMD_CONTROL_FRAME = EH10.set_open_auto_feedback_cmd()
+
+        ## set auto feedback interval time: unit:ms
+        #CMD_CONTROL_FRAME = EH10.set_auto_feedback_interval_time_cmd(1000)
+
+        ###print(" ".join(format(x, '02x') for x in CMD_CONTROL_FRAME))
+        #rpi_ser.write(serial.to_bytes(CMD_CONTROL_FRAME))  # serial transmit data to EH10(control command)
