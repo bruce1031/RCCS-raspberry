@@ -238,6 +238,7 @@ def cam_control(cam):
     # 雲台上下左右控制皆設定，以每秒50度旋轉18度
     # 旭展編輯撰寫
     global yaw, pitch
+    cam = str(cam)
     if cam == '0':
         EH10.set_return_head_cmd()
         EH10.set_camera_zoomOut_cmd()     # camera zoom in
