@@ -72,7 +72,7 @@ def takeoff(height):
         while True:
             time.sleep(1)
             print("目前高度：", vehicle.location.global_relative_frame.alt)
-            status(False)
+            status(False , 3)
             server.sql_update(ID, 'connect_status', 'true')
             if float(vehicle.location.global_relative_frame.alt) >= float(height)*0.95:
                 break
@@ -93,7 +93,7 @@ def updown(ud):
         while True:
             time.sleep(1)
             print("目前高度：", vehicle.location.global_relative_frame.alt)
-            status(False)
+            status(False , 3) 
             server.sql_update(ID, 'connect_status', 'true')
             if float(ud)*1.02 >= float(vehicle.location.global_relative_frame.alt) >= float(ud)*0.98:
                 break
@@ -121,7 +121,7 @@ def land(head):
     while vehicle.armed:
         gps0 = "%s" % vehicle.gps_0
         try:
-            status(False)
+            status(False , 3)
         except:
             pass
         print('返回中')
@@ -180,12 +180,12 @@ def condition_yaw(heading, relative):
     time.sleep(1)
 
 
-def status(info):
-    '''輸輸入:true or flase(是否要進行低電壓檢測)
+def status(info , row):
+    '''status(info , row)輸輸入:true or flase(是否要進行低電壓檢測) , 目前模式
     return 高度，電壓，經緯度
     作用:監測低電壓，高度 電量 gps上傳到sql'''
     if info == True:
-        if float(vehicle.battery.voltage) < 21.3 and row[5] == 1:
+        if float(vehicle.battery.voltage) < 21.3 and row == 1:
             print('低電壓')
             try:
                 send("低電壓、將強制降落")
@@ -293,8 +293,8 @@ server_connect_num = 0
 
 while True:
     try:
-        alt, bat, gps = status(True)
         row = server.sql_listen(ID)
+        alt, bat, gps = status(True , row[5])
         print(row)
         server.sql_update(ID, 'connect_status', 'true')
         if not vehicle.armed:
