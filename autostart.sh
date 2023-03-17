@@ -2,4 +2,4 @@
 
 cd /home/pi/
 
-python3 start.py 
+sudo python3 start.py 
