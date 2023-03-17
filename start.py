@@ -29,7 +29,6 @@ def b():
         os.system('ffmpeg -i /dev/video0 -f flv rtmp://172.23.121.179:1935/live/test')
     except:
         log('影像串流發生問題', e)
-log('successfully executed', None)
 
 try:
     point1 = threading.Thread(target = a)
