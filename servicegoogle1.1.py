@@ -68,6 +68,7 @@ def takeoff(height):
             server.sql_update(ID, 'dronemode', '2')
             break
         send('起飛')
+        time.sleep(3)
         vehicle.simple_takeoff(height)
         while True:
             time.sleep(1)
