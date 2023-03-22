@@ -40,16 +40,16 @@ def takeoff(height):
         # 無gps無法啟動
         server.sql_update(ID, 'takeoff', '')
         i = 0
-        send('啟動起飛前檢查程序')
+        send('1')
         while not vehicle.is_armable:
             time.sleep(1)
             i = i+1
             if i >= 5:
-                send("起飛前檢查錯誤,請查看您的gps、fix、濾波器")
+                send("2")
                 break
         if float(vehicle.battery.voltage) < 11.5:
             print('低電壓')
-            send("低電壓、不建議起飛")
+            send("3")
             break
         print('設定模式： GUIDED')
         vehicle.mode = VehicleMode("GUIDED")
@@ -62,12 +62,12 @@ def takeoff(height):
             i = i+1
             if i >= 5:
                 print('無法解鎖')
-                send("無法解鎖")
+                send("4")
                 break
         if i == 5:
             server.sql_update(ID, 'dronemode', '2')
             break
-        send('起飛')
+        send('5')
         time.sleep(3)
         vehicle.simple_takeoff(height)
         while True:
@@ -78,7 +78,7 @@ def takeoff(height):
             if float(vehicle.location.global_relative_frame.alt) >= float(height)*0.95:
                 break
         server.sql_update(ID, 'dronemode', '1')
-        send('完成')
+        send('6')
         break
     return head
 
@@ -99,14 +99,14 @@ def updown(ud):
             if float(ud)*1.02 >= float(vehicle.location.global_relative_frame.alt) >= float(ud)*0.98:
                 break
         server.sql_update(ID, 'dronemode', '1')
-        send('完成')
+        send('6')
     else:
-        send('差距過小、不移動')
+        send('7')
 
 
 def land(head):
     print("即將降落")
-    send('即將降落，請注意無人機落位置是否安全')
+    send('8')
     try:
         condition_yaw(head, False)
         while vehicle.heading != head:
@@ -133,7 +133,7 @@ def land(head):
         server.sql_update(ID, 'land', '')
     except:
         pass
-    send('完成')
+    send('6')
     vehicle.mode = VehicleMode("GUIDED")
 
 
@@ -177,7 +177,7 @@ def condition_yaw(heading, relative):
     vehicle.send_mavlink(msg)
     vehicle.flush()
     server.sql_update(ID, 'droneturn', '')
-    send('完成')
+    send('6')
     time.sleep(1)
 
 
@@ -189,7 +189,7 @@ def status(info , row):
         if float(vehicle.battery.voltage) < 21.3 and row == 1:
             print('低電壓')
             try:
-                send("低電壓、將強制降落")
+                send("9")
             except:
                 pass
             land(head)
@@ -228,7 +228,7 @@ def send_body_ned_velocity(velocity_x, velocity_y, velocity_z, duration):
 
     server.sql_update(ID, 'forward_back', '')
     print('完成')
-    send('完成')
+    send('6')
 
 
 def cam_control(cam):
@@ -269,7 +269,7 @@ def cam_control(cam):
     server.sql_update(ID, 'cam', '')
 
     print('完成')
-    send('完成鏡頭操作')
+    send('0')
 
 
 def allmove(ms1, ma2, ma3):
@@ -283,7 +283,7 @@ def allmove(ms1, ma2, ma3):
     server.sql_update(ID, 'allmove_FW', '')
     server.sql_update(ID, 'allmove_LR', '')
     server.sql_update(ID, 'allmove_yaw', '')
-    send("完成")
+    send("6")
 
 
 # ---------建立連線---------

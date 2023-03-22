@@ -2,6 +2,7 @@ import pymssql
 import time
 
 
+
 class sqlserver:
     def __init__(self, user, password):
         self.host = '172.23.70.50'
