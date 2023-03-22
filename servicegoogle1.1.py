@@ -5,6 +5,7 @@ import time
 from dronekit import connect, VehicleMode, LocationGlobalRelative
 from EH10_cmd_control import Gimbal
 from Scripts.sql_server.SQLS import sqlserver
+import threading
 global yaw, pitch
 # 主程式
 
@@ -74,7 +75,6 @@ def takeoff(height):
             time.sleep(1)
             print("目前高度：", vehicle.location.global_relative_frame.alt)
             status(False , 3)
-            server.sql_update(ID, 'connect_status', 'true')
             if float(vehicle.location.global_relative_frame.alt) >= float(height)*0.95:
                 break
         server.sql_update(ID, 'dronemode', '1')
@@ -95,7 +95,6 @@ def updown(ud):
             time.sleep(1)
             print("目前高度：", vehicle.location.global_relative_frame.alt)
             status(False , 3) 
-            server.sql_update(ID, 'connect_status', 'true')
             if float(ud)*1.02 >= float(vehicle.location.global_relative_frame.alt) >= float(ud)*0.98:
                 break
         server.sql_update(ID, 'dronemode', '1')
@@ -162,7 +161,6 @@ def condition_yaw(heading, relative):
 
     if not relative:
         direction = 0
-
     # 生成CONDITION_YAW命令
     msg = vehicle.message_factory.command_long_encode(
         0, 0,       # target system, target component
@@ -201,7 +199,6 @@ def status(info , row):
     gps = str(vehicle.location.global_relative_frame.lat) + \
         ',' + str(vehicle.location.global_relative_frame.lon)
     server.sql_update(ID, 'lat_lon', gps)
-    server.sql_update(ID, 'connect_status', 'true')
 
     return vehicle.location.global_relative_frame.alt, vehicle.battery.voltage, gps
 
@@ -225,7 +222,6 @@ def send_body_ned_velocity(velocity_x, velocity_y, velocity_z, duration):
     for x in range(0, abs(duration)):
         vehicle.send_mavlink(msg)
         time.sleep(0.3)
-
     server.sql_update(ID, 'forward_back', '')
     print('完成')
     send('6')
@@ -264,7 +260,6 @@ def cam_control(cam):
         EH10.set_camera_zoomOut_cmd()     # camera zoom in
         time.sleep(0.66)
         EH10.set_camera_stop_zoom_cmd()  # camera stop zoom
-
     EH10.set_movement_cmd(0, 5, 5, 0, 0, 50, pitch, 50, yaw)
     server.sql_update(ID, 'cam', '')
 
@@ -275,6 +270,7 @@ def cam_control(cam):
 def allmove(ms1, ma2, ma3):
     if ms1 != '0':
         send_body_ned_velocity(1, 0, 0, int(ms1))
+
     if ma2 != '0':
         send_body_ned_velocity(0, 1, 0, int(ma2))
     if ma3 != '0':
@@ -285,7 +281,15 @@ def allmove(ms1, ma2, ma3):
     server.sql_update(ID, 'allmove_yaw', '')
     send("6")
 
-
+def connect_status_thread():
+    server = sqlserver("test", '00000000')
+    while True:
+        try:
+            server.sql_update(ID, 'connect_status', 'true')
+            time.sleep(1)
+        except Exception as e:
+            print(e)
+            
 # ---------建立連線---------
 server = sqlserver("test", '00000000')
 if vehicle.armed != True:
@@ -293,6 +297,9 @@ if vehicle.armed != True:
     print('重置成功')
 else:
     print('起飛中無法重置')
+
+thread_connect_status = threading.Thread(target=connect_status_thread, daemon=True)
+thread_connect_status.start()
 
 a = 0
 server_connect_num = 0
@@ -302,7 +309,6 @@ while True:
         row = server.sql_listen(ID)
         alt, bat, gps = status(True , row[5])
         print(row)
-        server.sql_update(ID, 'connect_status', 'true')
         if not vehicle.armed:
             server.sql_update(ID, 'dronemode', 2)
         if row[1] != None:
