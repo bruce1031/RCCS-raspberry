@@ -268,7 +268,7 @@ def cam_control(cam):
     server.sql_update(ID, 'cam', '')
 
     print('完成')
-    send('10')
+    send('0')
 
 
 def allmove(ms1, ma2, ma3):
