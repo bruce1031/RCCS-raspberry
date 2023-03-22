@@ -288,6 +288,11 @@ def allmove(ms1, ma2, ma3):
 
 # ---------建立連線---------
 server = sqlserver("test", '00000000')
+if vehicle.armed != True:
+    server.sql_init(ID)
+    print('重置成功')
+else:
+    print('起飛中無法重置')
 
 a = 0
 server_connect_num = 0

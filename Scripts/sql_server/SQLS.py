@@ -97,18 +97,33 @@ class sqlserver:
             self.cursor.execute(
                 f"USE UAV UPDATE UAV_test SET {event}='{data}' WHERE id='{ID}'")
 
+    def sql_init(self , ID):
+        '''
+        輸入(ID)
+        '''
+        self.cursor = self.conn.cursor()
+        try:
+            self.cursor.execute(
+                f"USE UAV UPDATE UAV_test SET takeoff=null , land=null , massage=null , dronemode=2 ,up_down=null , droneturn=null , forward_back=null , cam=null , allmove_FW=null, allmove_LR=null, allmove_yaw=null, connect_status='True' WHERE id={ID}")
+        except Exception as e:
+            print(e)
 
 if __name__ == '__main__':
     d = 0
     D = 0
-    col_Table = ['id', 'takeoff', 'land', 'massage', 'alt', 'dronemode', 'up_down', 'lat_lon', 'droneturn',
+    col_Table = ['id', 'takeoff', 'land', 'massage', 'alti', 'dronemode', 'up_down', 'lat_lon', 'droneturn',
                  'forward_back', 'allmove', 'cam', 'dronebatt', 'GPSInfo', 'allmove_FW', 'allmove_LR', 'allmove_yaw', 'connect_status']
     #sql_data = sqlserver("test", '00000000')
     #print(sql_data.sql_select(1, 'takeoff'))
     while True:
 
-        event = str(input('updata(ud)/read(r)'))
-
+        event = str(input('updata(ud)/read(r)/init(i)'))
+        
+        if event == 'i':
+            sql_data = sqlserver("test", '00000000')
+            sql_data .sql_init(1)
+            print('完成')
+            break
         if event == 'ud':
             print('欄位名稱: 1-id , 2-takeoff , 3-land , 4-massage , 5-alt , 6-dronemode , 7-up_down , 8-lat_lon , 9-droneturn , 10-forward_back , 11-allmove , 12-cam , 13-dronebatt , 14-GPSInfo',
                   '15-allmove_FW', '16-allmove_LR', '17-allmove_yaw', '18-connect_status')
