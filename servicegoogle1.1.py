@@ -107,16 +107,16 @@ def updown(ud):
 def land(head):
     print("即將降落")
     send('8')
-    try:
+    '''try:
         condition_yaw(head, False)
         while vehicle.heading != head:
             if head-5 <= vehicle.heading <= head+5:
                 break
-            else:
+            else: 
                 time.sleep(1)
                 print('延遲中')
     except:
-        pass
+        pass'''
     vehicle.parameters['RTL_ALT'] = 0
     vehicle.mode = VehicleMode("RTL")
     while vehicle.armed:
