@@ -286,7 +286,7 @@ def connect_status_thread():
     while True:
         try:
             server.sql_update(ID, 'connect_status', 'true')
-            time.sleep(1)
+            time.sleep(2)
         except Exception as e:
             print(e)
             
