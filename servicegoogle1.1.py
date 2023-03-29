@@ -245,13 +245,13 @@ def cam_control(cam):
         EH10.set_camera_stop_zoom_cmd()
 
     if cam == '1':
-        yaw = yaw+10
+        yaw = yaw+4
     if cam == '2':
-        yaw = yaw-10
+        yaw = yaw-4
     if cam == '3':
-        pitch = pitch-5
+        pitch = pitch-4
     if cam == '4':
-        pitch = pitch+5
+        pitch = pitch+4
     if cam == '5':
         EH10.set_camera_zoomIn_cmd()     # camera zoom in
         time.sleep(0.66)
