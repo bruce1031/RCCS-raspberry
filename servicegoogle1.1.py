@@ -270,11 +270,10 @@ def cam_control(cam):
 def allmove(ms1, ma2, ma3):
     if ms1 != '0':
         send_body_ned_velocity(1, 0, 0, int(ms1))
-
     if ma2 != '0':
         send_body_ned_velocity(0, 1, 0, int(ma2))
     if ma3 != '0':
-        condition_yaw(int(ma2), True)
+        condition_yaw(int(ma3), True)
 
     server.sql_update(ID, 'allmove_FW', '')
     server.sql_update(ID, 'allmove_LR', '')
