@@ -241,9 +241,8 @@ def cam_control(cam):
         EH10.set_camera_zoomOut_cmd()     # camera zoom in
         pitch = 0
         yaw = 0
-        time.sleep(5)
+        time.sleep(3)
         EH10.set_camera_stop_zoom_cmd()
-
     if cam == '1':
         yaw = yaw+4
     if cam == '2':
@@ -260,7 +259,8 @@ def cam_control(cam):
         EH10.set_camera_zoomOut_cmd()     # camera zoom in
         time.sleep(0.66)
         EH10.set_camera_stop_zoom_cmd()  # camera stop zoom
-    EH10.set_movement_cmd(0, 5, 5, 0, 0, 50, pitch, 50, yaw)
+    if cam != '0':
+        EH10.set_movement_cmd(0, 5, 5, 0, 0, 50, pitch, 50, yaw)
     server.sql_update(ID, 'cam', '')
 
     print('完成')
@@ -285,7 +285,7 @@ def connect_status_thread():
     while True:
         try:
             server.sql_update(ID, 'connect_status', 'true')
-            time.sleep(2)
+            time.sleep(1)
         except Exception as e:
             print(e)
             
@@ -323,10 +323,11 @@ while True:
         print(head, vehicle.heading)
         if row[9] != None:
             send_body_ned_velocity(1, 0, 0, int(row[9]))
-        if row[14] != None or row[15] != None or row[16] != None:
+        if row[14] != None and row[15] != None and row[16] != None:
             allmove(row[14], row[15], row[16])
         if row[11] != None:
             cam_control(row[11])
+        print(pitch,yaw)
         "EH10.set_movement_cmd(0, 5, 5, 0, 0, 50, pitch, 50, yaw)"
         time.sleep(1)
     except:
