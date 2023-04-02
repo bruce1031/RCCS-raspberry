@@ -167,7 +167,7 @@ def condition_yaw(heading, relative):
         mavutil.mavlink.MAV_CMD_CONDITION_YAW,  # command
         0,          # confirmation
         heading,    # param 1, yaw in degrees
-        0,          # param 2, yaw speed (not used)
+        0.5,          # param 2, yaw speed
         direction,  # param 3, direction
                     isRelative,  # param 4, relative or absolute degrees
         0, 0, 0)    # param 5-7, not used
@@ -213,18 +213,31 @@ def send_body_ned_velocity(velocity_x, velocity_y, velocity_z, duration):
         0,       # time_boot_ms (not used)
         0, 0,    # target system, target component
         # frame Needs to be MAV_FRAME_BODY_NED for forward/back left/right control.
-        mavutil.mavlink.MAV_FRAME_BODY_OFFSET_NED,
+        mavutil.mavlink.MAV_FRAME_BODY_OFFSET_NED, #自身位置
         0b0000101111000111,  # type_mask
         0, 0, 0,  # x, y, z positions (not used)
         velocity_x, velocity_y, velocity_z,  # m/s
         0, 0, 0,  # x, y, z acceleration
         0, 0)
-    for x in range(0, abs(duration)):
+    while x <= abs(duration):
         vehicle.send_mavlink(msg)
-        time.sleep(0.3)
+        time.sleep(1)
+        x = x+1
     server.sql_update(ID, 'forward_back', '')
     print('完成')
     send('6')
+
+def send_local_ned_velocity(vx, vy, vz):
+    msg = vehicle.message_factory.set_position_target_local_ned_encode(
+        0,0,0,mavutil.mavlink.MAV_FRAME_LOCAL_NED,
+        0b110111000111,
+        0,0,0,
+        vx,vy,vz,
+        0,0,0,
+        0,0)
+    vehicle.send_mavlink(msg)
+    vehicle.flush()
+
 
 
 def cam_control(cam):
@@ -270,8 +283,10 @@ def cam_control(cam):
 def allmove(ms1, ma2, ma3):
     if ms1 != '0':
         send_body_ned_velocity(1, 0, 0, int(ms1))
+        time.sleep(2)
     if ma2 != '0':
         send_body_ned_velocity(0, 1, 0, int(ma2))
+        time.sleep(2)
     if ma3 != '0':
         condition_yaw(int(ma3), True)
 
