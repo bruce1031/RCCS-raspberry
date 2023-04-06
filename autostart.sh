@@ -1,5 +1,3 @@
 #!/bin/bash
 
-cd /home/pi/RCCS-raspberry/
-
-sudo python3 start.py 
+sudo python /home/pi/RCCS-raspberry/start.py
