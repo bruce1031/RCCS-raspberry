@@ -101,5 +101,8 @@ echo -e "allow-hotplug wwan0\iface wwan0 inet dhcp" | sudo tee -a /etc/network/i
 
 # 輸出目前無人機編號，網路ip
 
+sudo zerotier-cli listpeers
+
+
 # 重新啟動
 sudo reboot
