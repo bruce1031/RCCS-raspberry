@@ -108,6 +108,25 @@ class sqlserver:
         except Exception as e:
             print(e)
 
+    def create_new_drone_id_database(self):
+
+        self.cursor = self.conn.cursor()
+        try:
+            self.cursor.execute(
+                f"SELECT TOP 1 id FROM [UAV].[dbo].[UAV_test] ORDER BY id DESC")
+            row = self.cursor.fetchone()
+        except Exception as e:
+            print(e)
+            return e
+        row = row[0]+1
+        print(row)
+        self.cursor.execute(
+            f"INSERT INTO [UAV].[dbo].[UAV_test] (id) VALUES ({row})")
+        self.sql_init(row)
+
+        return row
+       
+
 if __name__ == '__main__':
     d = 0
     D = 0
@@ -115,13 +134,18 @@ if __name__ == '__main__':
                  'forward_back', 'allmove', 'cam', 'dronebatt', 'GPSInfo', 'allmove_FW', 'allmove_LR', 'allmove_yaw', 'connect_status']
     #sql_data = sqlserver("test", '00000000')
     #print(sql_data.sql_select(1, 'takeoff'))
+
     while True:
 
-        event = str(input('updata(ud)/read(r)/init(i)'))
-        
+        event = str(input('updata(ud)/read(r)/init(i)/create(c)'))
+        number = str(input('number:'))
+        if event == 'c':
+            sql_data = sqlserver("test", '00000000')
+            row=sql_data.create_new_drone_id_database()
+            break
         if event == 'i':
             sql_data = sqlserver("test", '00000000')
-            sql_data .sql_init(1)
+            sql_data.sql_init(number)
             print('完成')
             break
         if event == 'ud':
@@ -138,9 +162,9 @@ if __name__ == '__main__':
 
             sql_data = sqlserver("test", '00000000')
             try:
-                original_data = sql_data.sql_listen(1)
-                sql_data.sql_update(1, a, b)
-                revise_data = sql_data.sql_listen(1)
+                original_data = sql_data.sql_listen(number)
+                sql_data.sql_update(number, a, b)
+                revise_data = sql_data.sql_listen(number)
                 ok = False
                 for i in range(len(revise_data)):
                     if original_data[i] != revise_data[i]:
@@ -150,7 +174,7 @@ if __name__ == '__main__':
                         ok = True
                         break
                 if ok == False:
-                    print('無資料更新,資料庫:', sql_data.sql_listen(1))
+                    print('無資料更新,資料庫:', sql_data.sql_listen(number))
                 break
 
             except:
@@ -161,7 +185,7 @@ if __name__ == '__main__':
                     break
         if event == 'r':
             sql_data = sqlserver("test", '00000000')
-            print("目前資料庫:", sql_data.sql_listen(1))
+            print("目前資料庫:", sql_data.sql_listen(number))
             break
 
         else:
