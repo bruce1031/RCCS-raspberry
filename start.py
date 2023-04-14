@@ -1,6 +1,7 @@
 import os
 import datetime
 import threading
+import time
 
 #001使用
 def log(title , log):
@@ -25,6 +26,8 @@ def a():
 def b():
     try:
         os.system('sudo nginx service start')
+        os.system('sudo /usr/local/nginx/sbin/nginx')
+        time.sleep(1)
         os.system('ffmpeg -i /dev/video0 -f flv rtmp://172.23.121.179:1935/live/test')
     except:
 
