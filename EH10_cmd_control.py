@@ -150,6 +150,19 @@ class Gimbal:
         CMD_CONTROL = [0x3E, 0x3E, 0x00, 0x3E, 0x00]
         self.send_cmd(CMD_CONTROL)
         return CMD_CONTROL
+    
+    ## OSD on/0ff datasheet p19 p20
+    def OSD_settings_cmd(self):
+        CAMERA_CMD_CONTROL = [0xAA, 0x55, 0x05, 0xFF, 0xFF]
+        self.send_cmd(CAMERA_CMD_CONTROL)
+        return CAMERA_CMD_CONTROL
+    
+    ## Z40k/Q40TIR record time OSD on/off
+    ## C0：off  D0 ：on
+    def record_time_OS_ONOFF_cmd(self):
+        CAMERA_CMD_CONTROL = [0xAA, 0x55, 0x25, 0xC0, 0xFF]
+        self.send_cmd(CAMERA_CMD_CONTROL)
+        return CAMERA_CMD_CONTROL
 
     ## auto feedback interval time: unit:ms
     def set_auto_feedback_interval_time_cmd(self, interval_time_ms):
@@ -245,7 +258,6 @@ if __name__ == '__main__':
 
     while True:
         cam = str(input('number:'))
-        print(cam)
 
         if cam == '0':
             EH10.set_return_head_cmd()
@@ -271,7 +283,9 @@ if __name__ == '__main__':
             time.sleep(0.66)
             EH10.set_camera_stop_zoom_cmd()  # camera stop zoom
         EH10.set_movement_cmd(0, 5, 5, 0, 0, 50, pitch, 50, yaw)
-
+        if cam == '7':
+            EH10.record_time_OS_ONOFF_cmd()
+            print('完成')
         print(f'pitch:{pitch} , yaw:{yaw}' )
 
 
