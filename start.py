@@ -2,20 +2,31 @@ import os
 import datetime
 import threading
 import time
+from cryptography.fernet import Fernet
+import json
 
 #001使用
-def log(title , log):
+with open('encrypted.txt', 'rb') as f:
+    key = f.read()
+fernet = Fernet(key)
+
+with open('info.json', 'rb') as f:
+    encrypted_data = f.read()
+# 解密 JSON
+decrypted_data = fernet.decrypt(encrypted_data).decode()
+data = json.loads(decrypted_data)
+
+def log(title , info):
     '''title輸入標題,log有錯誤訊息打入(無請打入None)'''
-    with open("/home/pi/RCCS-raspberry/log/serverlog.txt" , "a+") as f:
-        if log == None:
-            f.write(f'{time()}\nMassage:{title}\n ------------------------------\n')
-        else:
-            f.write(f'{time()}\n Massage:{title}\n [ERROR] {log}\n------------------------------\n')
-def time():
     today=datetime.datetime.today()
-    today = today.strftime("Time:%Y/%m/%d %H:%M:%S")
-    print(today)
-    return today
+    todaytime = today.strftime("Time:%Y/%m/%d %H:%M:%S")
+    today = today.strftime("%Y_%m_%d")
+    path=(f'/home/pi/RCCS-raspberry/log/raspberry_server_log{today}.txt')
+    with open(path , "a+") as f:
+        if info == None:
+            f.write(f'{todaytime}\nMassage:{title}\n ------------------------------\n')
+        else:
+            f.write(f'{todaytime}\nMassage:{title}\n [ERROR] {info}\n------------------------------\n')
 
 def a():
     try:
@@ -28,7 +39,8 @@ def b():
         os.system('sudo nginx service start')
         os.system('sudo /usr/local/nginx/sbin/nginx')
         time.sleep(1)
-        os.system('ffmpeg -i /dev/video0 -f flv rtmp://172.23.121.179:1935/live/test')
+        ip = data['zerotier_ip_address']
+        os.system('ffmpeg -i -re /dev/video0 -f flv rtmp://{ip}:1935/live/test')
     except:
 
         log('影像串流發生問題', e)

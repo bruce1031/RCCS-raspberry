@@ -5,7 +5,10 @@ import time
 from dronekit import connect, VehicleMode, LocationGlobalRelative
 from EH10_cmd_control import Gimbal
 from Scripts.sql_server.SQLS import sqlserver
-import threading
+import threading , json
+import datetime
+from cryptography.fernet import Fernet
+
 global yaw, pitch
 # 主程式
 
@@ -26,11 +29,36 @@ EH10.set_return_head_cmd()
 
 # 從下複製貼上
 
+with open('encrypted.txt', 'rb') as f:
+    key = f.read()
+fernet = Fernet(key)
+
+with open('info.json', 'rb') as f:
+    encrypted_data = f.read()
+# 解密 JSON
+decrypted_data = fernet.decrypt(encrypted_data).decode()
+data = json.loads(decrypted_data)
+
+
+
 head = ''
 pitch = 0
 yaw = 0
 
-ID = 1  # 無人機編號
+ID = data['drone_id']  # 無人機編號
+
+
+def log(title , info):
+    '''title輸入標題,log有錯誤訊息打入(無請打入None)'''
+    today=datetime.datetime.today()
+    todaytime = today.strftime("Time:%Y/%m/%d %H:%M:%S")
+    today = today.strftime("%Y_%m_%d")
+    path=(f'/home/pi/RCCS-raspberry/log/raspberry_server_log{today}.txt')
+    with open(path , "a+") as f:
+        if info == None:
+            f.write(f'{todaytime}\nMassage:{title}\n ------------------------------\n')
+        else:
+            f.write(f'{todaytime}\nMassage:{title}\n [ERROR] {info}\n------------------------------\n')
 
 
 def takeoff(height):
@@ -307,7 +335,7 @@ def connect_status_thread():
             print(e)
             
 # ---------建立連線---------
-server = sqlserver("test", '00000000')
+server = sqlserver(data['sql_account'], data['sql_password'])
 if vehicle.armed != True:
     server.sql_init(ID)
     print('重置成功')
