@@ -167,7 +167,7 @@ def condition_yaw(heading, relative):
         mavutil.mavlink.MAV_CMD_CONDITION_YAW,  # command
         0,          # confirmation
         heading,    # param 1, yaw in degrees
-        0.5,          # param 2, yaw speed
+        7,          # param 2, yaw speed
         direction,  # param 3, direction
                     isRelative,  # param 4, relative or absolute degrees
         0, 0, 0)    # param 5-7, not used
@@ -222,6 +222,7 @@ def send_body_ned_velocity(velocity_x, velocity_y, velocity_z, duration):
     x=0
     while x <= abs(duration):
         vehicle.send_mavlink(msg)
+        vehicle.flush()
         time.sleep(1)
         x = x+1
     server.sql_update(ID, 'forward_back', '')
@@ -339,6 +340,7 @@ while True:
         print(head, vehicle.heading)
         if row[9] != None:
             send_body_ned_velocity(1, 0, 0, int(row[9]))
+            server.sql_update(ID, 'forward_back', '')
         if row[14] != None and row[15] != None and row[16] != None:
             allmove(row[14], row[15], row[16])
         if row[11] != None:
