@@ -23,6 +23,8 @@ sudo pip install -U pip
 sudo pip3 install pymavlink
 sudo pip3 install dronekit 
 sudo pip3 install pyserial
+sudo pip3 install cryptography
+
 
 # 安裝 pymysql 還需測試
 sudo pip3 install Cython
@@ -36,9 +38,6 @@ sudo pip3 install pymssql
 #cd RCCS-raspberry
 #git submodule update --init
 
-#手動創建autostart.sh檔案
-echo 'sudo python /home/pi/RCCS-raspberry/start.py &' > /home/pi/autostart.sh
-sudo chmod 777 autostart.sh
 
 # 安裝nginx及影像串流ffmpeg
 cd install_package
@@ -52,6 +51,7 @@ sudo ./configure --prefix=/usr/local/nginx --add-module=nginx-rtmp-module --with
 sudo make
 sudo make install
 sudo apt-get install ffmpeg -y
+
 
 # 修改nginx文件
 echo -e "#RTMP 服务
@@ -71,6 +71,11 @@ rtmp
     }
 }
 " | sudo tee -a /usr/local/nginx/conf/nginx.conf
+
+#手動創建autostart.sh檔案
+cd
+echo '#!/bin/bash\nsudo python /home/pi/RCCS-raspberry/start.py' > /home/pi/autostart.sh
+sudo chmod 777 autostart.sh
 
 # 更改uart端口
 sudo raspi-config nonint do_serial 0
@@ -93,13 +98,14 @@ sudo apt install -y zerotier-one
 sudo zerotier-cli join 632ea290851611e0
 
 #加入d-link網路
-allow-hotplug wwan0
-iface wwan0 inet dhcp
-echo -e "allow-hotplug wwan0\iface wwan0 inet dhcp" | sudo tee -a /etc/network/interfaces
+
+echo -e "allow-hotplug wwan0\niface wwan0 inet dhcp" | sudo tee -a /etc/network/interfaces
 
 # 新增新無人機ID，並輸出目前無人機ID，網路ip，sql帳號密碼，隨後刪除（避免發現如何加密）
+cd RCCS-raspberry
 sudo python3 create_info.py
 rm create_info.py
 
 # 重新啟動
+echo "Success，Raspberry Pi is about to reboot"
 sudo reboot
