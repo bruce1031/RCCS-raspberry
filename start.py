@@ -6,11 +6,11 @@ from cryptography.fernet import Fernet
 import json
 
 #001使用
-with open('encrypted.txt', 'rb') as f:
+with open('/home/pi/RCCS-raspberry/encrypted.txt', 'rb') as f:
     key = f.read()
 fernet = Fernet(key)
 
-with open('info.json', 'rb') as f:
+with open('/home/pi/RCCS-raspberry/info.json', 'rb') as f:
     encrypted_data = f.read()
 # 解密 JSON
 decrypted_data = fernet.decrypt(encrypted_data).decode()
@@ -40,7 +40,7 @@ def b():
         os.system('sudo /usr/local/nginx/sbin/nginx')
         time.sleep(1)
         ip = data['zerotier_ip_address']
-        os.system('ffmpeg -i -re /dev/video0 -f flv rtmp://{ip}:1935/live/test')
+        os.system(f'ffmpeg -re -i  /dev/video0 -f flv rtmp://{ip}:1935/live/test')
     except:
 
         log('影像串流發生問題', e)

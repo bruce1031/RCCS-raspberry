@@ -74,14 +74,15 @@ rtmp
 
 #手動創建autostart.sh檔案
 cd
-echo '#!/bin/bash\nsudo python /home/pi/RCCS-raspberry/start.py' > /home/pi/autostart.sh
+echo '#!/bin/bash
+sudo python /home/pi/RCCS-raspberry/start.py' > /home/pi/autostart.sh
 sudo chmod 777 autostart.sh
 
 # 更改uart端口
-sudo raspi-config nonint do_serial 0
-sudo sh -c 'echo "enable_uart=1" >> /boot/config.txt'
-echo -e "dtoverlay=pi3-miniuart-bt\ndtoverlay=pi3-disable-bt" | sudo tee -a /boot/config.txt 
 sudo raspi-config nonint do_serial 1
+sudo sh -c 'echo "enable_uart=1" >> /boot/config.txt'
+echo -e "enable_uart=1\dtoverlay=pi3-miniuart-bt\ndtoverlay=pi3-disable-bt" | sudo tee -a /boot/config.txt 
+
 
 # 開機自動啟動
 
