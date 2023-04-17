@@ -1,8 +1,6 @@
 import pymssql
 import time
 
-
-
 class sqlserver:
     def __init__(self, user, password):
         self.host = '172.23.70.50'
@@ -99,7 +97,7 @@ class sqlserver:
 
     def sql_init(self , ID):
         '''
-        輸入(ID)
+        #輸入(ID)
         '''
         self.cursor = self.conn.cursor()
         try:
@@ -131,7 +129,7 @@ if __name__ == '__main__':
     d = 0
     D = 0
     col_Table = ['id', 'takeoff', 'land', 'massage', 'alti', 'dronemode', 'up_down', 'lat_lon', 'droneturn',
-                 'forward_back', 'allmove', 'cam', 'dronebatt', 'GPSInfo', 'allmove_FW', 'allmove_LR', 'allmove_yaw', 'connect_status']
+                 'forward_back', 'allmove', 'cam', 'dronebatt', 'GPSInfo', 'allmove_FW', 'allmove_LR', 'allmove_yaw', 'connect_status' , 'ip']
     #sql_data = sqlserver("test", '00000000')
     #print(sql_data.sql_select(1, 'takeoff'))
 
@@ -142,6 +140,7 @@ if __name__ == '__main__':
         if event == 'c':
             sql_data = sqlserver("test", '00000000')
             row=sql_data.create_new_drone_id_database()
+            print(f'新增加的無人機編號為：{row}')
             break
         if event == 'i':
             sql_data = sqlserver("test", '00000000')
@@ -150,7 +149,7 @@ if __name__ == '__main__':
             break
         if event == 'ud':
             print('欄位名稱: 1-id , 2-takeoff , 3-land , 4-massage , 5-alt , 6-dronemode , 7-up_down , 8-lat_lon , 9-droneturn , 10-forward_back , 11-allmove , 12-cam , 13-dronebatt , 14-GPSInfo',
-                  '15-allmove_FW', '16-allmove_LR', '17-allmove_yaw', '18-connect_status')
+                  '15-allmove_FW', '16-allmove_LR', '17-allmove_yaw', '18-connect_status' , 'ip')
             a = input('輸入欄位名稱or編號:')
             try:
                 a = int(a)
