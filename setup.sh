@@ -40,7 +40,7 @@ sudo pip3 install pymssql
 echo 'sudo python /home/pi/RCCS-raspberry/start.py &' > /home/pi/autostart.sh
 sudo chmod 777 autostart.sh
 
-# 安豬nginx及影像串流ffmpeg
+# 安裝nginx及影像串流ffmpeg
 cd install_package
 git clone  https://github.com/arut/nginx-rtmp-module
 wget https://www.openssl.org/source/openssl-1.1.1.tar.gz 
@@ -71,8 +71,6 @@ rtmp
     }
 }
 " | sudo tee -a /usr/local/nginx/conf/nginx.conf
-#啟動nginx
-sudo /usr/local/nginx/sbin/nginx
 
 # 更改uart端口
 sudo raspi-config nonint do_serial 0
@@ -99,10 +97,9 @@ allow-hotplug wwan0
 iface wwan0 inet dhcp
 echo -e "allow-hotplug wwan0\iface wwan0 inet dhcp" | sudo tee -a /etc/network/interfaces
 
-# 輸出目前無人機編號，網路ip
-
-sudo zerotier-cli listpeers
-
+# 新增新無人機ID，並輸出目前無人機ID，網路ip，sql帳號密碼，隨後刪除（避免發現如何加密）
+sudo python3 create_info.py
+rm create_info.py
 
 # 重新啟動
 sudo reboot
