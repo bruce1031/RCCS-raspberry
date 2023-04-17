@@ -5,20 +5,30 @@ from cryptography.fernet import Fernet
 #是否要加入json檔案可使用時間
 
 #將資料轉換成json並加密
+while True:
+    try:
+        con = str(input("請聯絡管理員打開zerotier權限，完成請打入（y）:"))
+        if con == 'y':
+            # 執行指令，取得Zerotier IP
+            output = subprocess.check_output(["sudo", "zerotier-cli", "listnetworks"]).decode("utf-8")
+            lines = output.strip().split('\n')
+            lines=lines[1].split()
+            zerotier_ip = ""
 
-# 執行指令，取得Zerotier IP
-output = subprocess.check_output(["sudo", "zerotier-cli", "listnetworks"]).decode("utf-8")
-lines = output.strip().split('\n')
-lines=lines[1].split()
-zerotier_ip = ""
-
-# 搜尋Zerotier IP
-for line in lines:
-    if "200" in line:
-        parts = lines
-        if len(parts) > 2:
-            zerotier_ip = parts[8].split('/')[0]
+            # 搜尋Zerotier IP
+            for line in lines:
+                if "200" in line:
+                    parts = lines
+                    if len(parts) > 2:
+                        print(parts[8])
+                        zerotier_ip = parts[8].split('/')[0]
+                        break
             break
+        else:
+            continue
+    except:
+        print('權限尚未開啟，請檢察網路，或是聯絡管理員')
+
 
 
 #儲存sql帳號密碼
@@ -74,5 +84,3 @@ else:
     with open('info.json', 'w') as f:
         json.dump(data, f)
     print('無加密')
-
-
