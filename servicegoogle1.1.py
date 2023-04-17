@@ -29,11 +29,11 @@ EH10.set_return_head_cmd()
 
 # 從下複製貼上
 
-with open('encrypted.txt', 'rb') as f:
+with open('/home/pi/RCCS-raspberry/encrypted.txt', 'rb') as f:
     key = f.read()
 fernet = Fernet(key)
 
-with open('info.json', 'rb') as f:
+with open('/home/pi/RCCS-raspberry/info.json', 'rb') as f:
     encrypted_data = f.read()
 # 解密 JSON
 decrypted_data = fernet.decrypt(encrypted_data).decode()
