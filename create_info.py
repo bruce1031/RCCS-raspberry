@@ -2,7 +2,6 @@ import json
 import subprocess
 from Scripts.sql_server.SQLS import sqlserver
 from cryptography.fernet import Fernet
-'''
 #是否要加入json檔案可使用時間
 
 #將資料轉換成json並加密
@@ -24,12 +23,12 @@ for line in lines:
 
 #儲存sql帳號密碼
 account = "test"
-password = '00000000'
+password = "00000000"
 
 
 #drone ID
 sql_data = sqlserver("test", '00000000')
-id=1
+id=sql_data.create_new_drone_id_database()
 
 #上傳ip到伺服器
 sql_data.sql_update(id, 'ip', zerotier_ip)
@@ -76,17 +75,4 @@ else:
         json.dump(data, f)
     print('無加密')
 
-'''
-with open('key.txt', 'rb') as f:
-    key = f.read()
-fernet = Fernet(key)
 
-with open('info.json', 'rb') as f:
-    encrypted_data = f.read()
-# 解密 JSON
-decrypted_data = fernet.decrypt(encrypted_data).decode()
-data = json.loads(decrypted_data)
-print(data['drone_id'])
-print(data['sql_account'])
-print(data['sql_password'])
-print(data['zerotier_ip_address'])
