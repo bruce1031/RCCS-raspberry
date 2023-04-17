@@ -39,14 +39,11 @@ with open('info.json', 'rb') as f:
 decrypted_data = fernet.decrypt(encrypted_data).decode()
 data = json.loads(decrypted_data)
 
-
-
 head = ''
 pitch = 0
 yaw = 0
 
 ID = data['drone_id']  # 無人機編號
-
 
 def log(title , info):
     '''title輸入標題,log有錯誤訊息打入(無請打入None)'''
