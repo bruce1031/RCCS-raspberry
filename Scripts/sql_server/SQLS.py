@@ -121,8 +121,18 @@ class sqlserver:
         self.cursor.execute(
             f"INSERT INTO [UAV].[dbo].[UAV_test] (id) VALUES ({row})")
         self.sql_init(row)
-
         return row
+    
+    def delete_database(self , id):
+        self.cursor = self.conn.cursor()
+        try:
+            self.cursor.execute(
+                f"DELETE FROM [UAV].[dbo].[UAV_test] WHERE id = {id};")
+        except Exception as e:
+            print(e)
+            return e
+        
+
        
 
 if __name__ == '__main__':
@@ -135,8 +145,14 @@ if __name__ == '__main__':
 
     while True:
 
-        event = str(input('updata(ud)/read(r)/init(i)/create(c)'))
-        number = str(input('number:'))
+        event = str(input('updata(ud)/read(r)/init(i)/create(c)/delete(d):'))
+        number = str(input('id:'))
+
+        if event == 'd':
+            sql_data = sqlserver("test", '00000000')
+            sql_data.delete_database(number)
+            print(f'已刪除id為：{number}的資料')
+            break
         if event == 'c':
             sql_data = sqlserver("test", '00000000')
             row=sql_data.create_new_drone_id_database()
